@@ -2,3 +2,11 @@
 .Rhistory
 .RData
 .Ruserdata
+^manuscript-article/$
+^parameter-estimation-outputs/estimates$
+^parameter-estimation-outputs/estimates-no-swc$
+^supplementary_info/$
+^research-meetings/$
+^old-code/$
+^data-raw/Fire-Shapefiles$
+

@@ -1,16 +1,18 @@
 Package: FireGrow
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Title: Scripts and analysis for process modeling of a Canadian fire chronosequence
+Version: 1.0.0
+Author: John Zobitz
+Maintainer: John Zobitz <zobitz@augsburg.edu>
+Description: This code will prepare and run all scripts to produce results for Zobitz et. al (2024). Submitted to JGR: Machine Learning and Computation
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 Depends: 
     R (>= 2.10)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.3.1
 Imports: 
+    geigen,
     magrittr
+URL: https://github.com/jmzobitz/FireGrow
+BugReports: https://github.com/jmzobitz/FireGrow/issues

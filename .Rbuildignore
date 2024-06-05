@@ -6,5 +6,9 @@
 .Rdata
 .httr-oauth
 .DS_Store
-data-raw/Fire-Shapefiles/
+data-raw/
 manuscripts/
+research-meetings/
+old-code/
+param-values/
+^LICENSE\.md$
