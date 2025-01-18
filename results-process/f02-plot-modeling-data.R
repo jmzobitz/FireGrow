@@ -2,6 +2,8 @@
 ### Last modified: 24/06/01
 ### Purpose: bring together the swc, tvdi, soil temperature, permafrost depth, litter into a common dataset and also plot them for the paper
 
+library(grid)
+library(gridExtra)
 
 # Join the different timeseries together, grouping by the depth and the site ID. # We will run the models at each of the different depths.
 
@@ -51,8 +53,9 @@ reframe(out_value = quantile(value,na.rm=TRUE,probs = c(0.025,0.5,0.975)),q=c(1,
 # Now we are ready to plot according to our simulation
 my_labeller <- as_labeller(c(T_soil_5="5~cm~T[S]~('°C')",
                              T_soil_10="10~cm~T[S]~('°C')",
+                             T_soil="~T[S]~('°C')",
                              gpp="GPP~(gC~m^-2~d^-1)",
-                             swc="SWC~(no~units)",
+                             swc="SWC~(m^3~m^-3)",
                              N2012="2012",
                              N1990="1990",
                              N1969="1968",
@@ -73,16 +76,56 @@ p1 <- modeling_data_plot |> ungroup() |>
   pivot_wider(names_from="q",values_from=out_value,names_prefix="q") |>
   mutate(site = factor(site,levels=c("N2012","N1990","N1969","NC"))) |>
   mutate(name = factor(name,levels=c("swc","gpp","T_soil_5","T_soil_10"))) |>
-  filter(Date >= as.Date("2015-12-31")) |>
+  filter(Date >= as.Date("2015-12-31"),
+         !(name %in% c("T_soil_5","T_soil_10"))) |>
   ggplot(aes(x=Date)) +
-  geom_line(aes(y=q2,color=name)) +
-  geom_ribbon(aes(ymin=q1,ymax=q3,fill=name),alpha=0.5) +
+  geom_line(aes(y=q2)) +
+  geom_ribbon(aes(ymin=q1,ymax=q3),alpha=0.5) +
   facet_grid(name~site,scales="free_y",labeller = my_labeller) +
-  geom_hline(data=line_data,aes(yintercept=yint),linetype='solid',color='grey80') + theme_fulbright() +
-  labs(y="Value",x="Year") +
+  geom_hline(data=filter(line_data,!(name %in% c("T_soil_5","T_soil_10"))),aes(yintercept=yint),linetype='solid',color='grey80') + theme_fulbright() +
+  labs(y=NULL,x=NULL) +
   scale_x_date(breaks=date_br1,date_labels = "%Y",minor_breaks = date_br5) +
   theme(axis.text.x = element_text(angle = -90, vjust = 0.5, hjust=1),
         axis.title=element_text(size=24),
-        panel.grid.major.x=element_line(colour="grey",linetype = 'dashed')) + guides(color="none",fill="none")
+        panel.grid.major.x=element_line(colour="grey",linetype = 'dashed'),
+        ) + guides(color="none",fill="none",x="none")
 
-ggsave('manuscript-figures/model-forcings.png',plot=p1,width=15,height=10)
+
+p1a <- modeling_data_plot |> ungroup() |>
+  pivot_wider(names_from="q",values_from=out_value,names_prefix="q") |>
+  mutate(site = factor(site,levels=c("N2012","N1990","N1969","NC"))) |>
+  mutate(name = factor(name,levels=c("swc","gpp","T_soil_5","T_soil_10")),
+         name2 = str_extract(name,"T_soil")) |>
+  filter(Date >= as.Date("2015-12-31")) |>
+  filter(name %in% c("T_soil_10","T_soil_5")) |>
+  ggplot(aes(x=Date)) +
+  geom_line(aes(y=q2,color=name)) +
+  geom_ribbon(aes(ymin=q1,ymax=q3,color=name),alpha=0.5,show.legend = FALSE) +
+  facet_grid(name2~site,scales="free_y",labeller = my_labeller) +
+  geom_hline(data=filter(line_data,(name %in% c("T_soil_5","T_soil_10"))),aes(yintercept=yint),linetype='solid',color='grey80') + theme_fulbright() +
+  labs(y=NULL,x="Day of Year") +
+  scale_x_date(breaks=date_br1,date_labels = "%Y",minor_breaks = date_br5) +
+  theme(axis.text.x = element_text(angle = -90, vjust = 0.5, hjust=1),
+        axis.title=element_text(size=24),
+        panel.grid.major.x=element_line(colour="grey",linetype = 'dashed'),
+        strip.text.x = element_blank()) + guides(fill="none") +  scale_color_manual(
+          name = "Soil depth:",  # Custom legend title
+          labels = c(
+            T_soil_5 = "5 cm",
+            T_soil_10 = "10 cm"
+          ),
+          values = c(
+            T_soil_5 = "#0072B2",
+            T_soil_10 = "#E69F00"
+          )  # Custom colors
+        )
+
+
+g1 <- ggplotGrob(p1)
+g2 <- ggplotGrob(p1a)
+
+g <- rbind(g1,g2, size = "first")
+
+
+
+ggsave('manuscript-figures/model-forcings.png',plot=g,width=15,height=10)

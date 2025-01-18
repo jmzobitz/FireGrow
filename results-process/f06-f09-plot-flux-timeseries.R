@@ -1,7 +1,9 @@
 ### Author: JMZ
 ### Last modified: 24/06/01
 ### Purpose: Plot the flux results at each of the different sites, summarized by the year
-
+library(grid)
+library(gridExtra)
+library(gtable)
 
 load('parameter-estimation-outputs/parameter-estimate-summary.Rda')
 
@@ -55,7 +57,7 @@ my_labeller2 <- as_labeller(c("null"="Null", "microbe"="Microbe","quality"="Qual
       ggplot(aes(x=doy+as.Date("2018-12-31"))) +
       geom_line(aes(y=q0.5,color=model)) +
       geom_ribbon(aes(ymin=q0.25,ymax=q0.75,fill=model),alpha=0.3) +
-      geom_rect(data = field_data,aes(xmin=aug1+as.Date("2018-12-31"),xmax=aug31+as.Date("2018-12-31"),ymin=q25_Rsoil,ymax=q75_Rsoil),inherit.aes = FALSE,fill='grey50',alpha=0.5)+
+      #geom_rect(data = field_data,aes(xmin=aug1+as.Date("2018-12-31"),xmax=aug31+as.Date("2018-12-31"),ymin=q25_Rsoil,ymax=q75_Rsoil),inherit.aes = FALSE,fill='grey50',alpha=0.5)+
       facet_grid(name~Year,labeller = my_labeller,scales="free_y") +
       ggh4x::facetted_pos_scales(
         y = list(
@@ -68,7 +70,7 @@ my_labeller2 <- as_labeller(c("null"="Null", "microbe"="Microbe","quality"="Qual
       ) +
       theme(legend.position="bottom") +
       theme_fulbright() +
-      labs(x=NULL,y=bquote(~Flux~'('~g~C~m^-2~d^-1*~')'),color="Model:",fill="Model:") +
+      labs(x="Day of year",y=bquote(~Flux~'('~g~C~m^-2~d^-1*~')'),color="Model:",fill="Model:") +
       scale_color_discrete(
         limits = c("null", "microbe", "quality"),
         labels = c("Null", "Microbe", "Quality")
@@ -85,12 +87,24 @@ my_labeller2 <- as_labeller(c("null"="Null", "microbe"="Microbe","quality"="Qual
   }
 
   # Make plots
-  p1 <- make_respiration_plots("T_soil_5") + ggtitle('5 cm depth')
-  p2 <- make_respiration_plots("T_soil_10") + ggtitle('10 cm depth')
+  p1 <- make_respiration_plots("T_soil_5") +
+    ggtitle('5 cm depth') +
+    theme(strip.text.y = element_blank(),legend.position = "none") +
+    labs(color=NULL,fill=NULL)
+
+  p2 <- make_respiration_plots("T_soil_10") + ggtitle('10 cm depth')  +
+    labs(y=NULL) +
+    theme(legend.position = "none")
+
+  shared_legend<-lemon::g_legend(make_respiration_plots("T_soil_5"))
+
+
+  out_big <- grid.arrange(p1,p2,nrow=1,
+                          bottom=shared_legend$grobs[[1]],vp=viewport(width=1, height=1, clip = TRUE))
+
 
   # Now save them
-  ggsave(filename = 'manuscript-figures/flux-results-model-5cm.png',plot = p1,width = 11,height=8)
-  ggsave(filename = 'manuscript-figures/flux-results-model-10cm.png',plot = p2,width = 11,height=8)
+  ggsave(filename = 'manuscript-figures/flux-results-model.png',plot = out_big,width = 18,height=10)
 
   my_labeller2 <- as_labeller(c("null"="Null", "microbe"="Microbe","quality"="Quality","N2012"="2012","N1969"="1968","NC"="Control","N1990"="1990"),default = label_parsed)
 
@@ -108,24 +122,37 @@ my_labeller2 <- as_labeller(c("null"="Null", "microbe"="Microbe","quality"="Qual
              model = factor(model,levels=c('null','microbe','quality'))) |>
       ggplot(aes(x=doy+as.Date("2018-12-31"),y = value, fill = name),alpha=0.7) +
       ggstream::geom_stream(type='proportional',alpha=0.7) +
-      geom_rect(data = field_data,aes(xmin=aug1+as.Date("2018-12-31"),xmax=aug31+as.Date("2018-12-31"),ymin=0,ymax=1),inherit.aes = FALSE,fill='grey50',alpha=0.5)+
+      #geom_rect(data = field_data,aes(xmin=aug1+as.Date("2018-12-31"),xmax=aug31+as.Date("2018-12-31"),ymin=0,ymax=1),inherit.aes = FALSE,fill='grey50',alpha=0.5)+
       facet_grid(model~Year,labeller = my_labeller2,scales="free_y") +
       theme(legend.position="bottom") +
       theme_fulbright() +
-      labs(x=NULL,y="Proportion",fill="Flux:") +
+      labs(x="Day of year",y="Proportion",fill="Flux:") +
       scale_y_continuous(breaks = seq(0,1,by=0.2)) +
       scale_x_date( date_labels = "%b",
                     limits = as.Date(c('2018-12-21','2020-01-01')),
                     breaks = c(as.Date('2019-01-01'),as.Date('2019-04-01'),as.Date('2019-07-01'),as.Date('2019-10-01'),as.Date('2019-12-31')))  +
       theme(axis.text.x=element_text(angle = 45, vjust = 0.5) ) +
-      scale_fill_viridis_d( labels = c(root_R=expression(R[A]), microbeGrowth=expression(R[G]),microbe_R=expression(R[H])))
+      scale_fill_viridis_d( labels = c(root_R=expression(p[A]), microbeGrowth=expression(p[G]),microbe_R=expression(p[H])))
 
 
   }
-  stream_5cm <- make_stream_plots("T_soil_5") +  ggtitle('5 cm depth')
-  stream_10cm <- make_stream_plots("T_soil_10") +  ggtitle('10 cm depth')
+  stream_5cm <- make_stream_plots("T_soil_5") +  ggtitle('5 cm depth') +
+    theme(strip.text.y = element_blank(),legend.position = "none") +
+    labs(color=NULL,fill=NULL)
+
+  stream_10cm <- make_stream_plots("T_soil_10") +
+    ggtitle('10 cm depth') +
+    labs(y=NULL) +
+    theme(legend.position = "none")
+
+
+  shared_legend<-lemon::g_legend(make_stream_plots("T_soil_5"))
+
+
+  out_big_stream <- grid.arrange(stream_5cm,stream_10cm,nrow=1,
+                          bottom=shared_legend$grobs[[1]],vp=viewport(width=1, height=1, clip = TRUE))
 
   # Now save them
-  ggsave(filename = 'manuscript-figures/proportion-results-model-5cm.png',plot = stream_5cm,width = 11,height=8)
-  ggsave(filename = 'manuscript-figures/proportion-results-model-10cm.png',plot = stream_10cm,width = 11,height=8)
+  ggsave(filename = 'manuscript-figures/proportion-results-model.png',plot = out_big_stream,width = 18,height=7)
+
 

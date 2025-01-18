@@ -61,7 +61,24 @@ calculate_double_boxplot <- function(in_tibble) {
 # Run these at target values
 ### STEP 0: Read in simulation results. Keep track of files that didn't work (we need to investigate what is happening)
 
-input_files <- list.files(path = 'parameter-estimation-outputs/estimates',pattern="^N",full.names = TRUE)
+# Define the directory to search
+directory <- "parameter-estimation-outputs/estimates"
+
+# List all files containing "N"
+all_files <- list.files(
+  path = directory,
+  pattern = "N",
+  full.names = TRUE,
+  ignore.case = TRUE
+)
+
+# Filter out files that end with "iterations.Rda"
+input_files <- grep("iterations\\.Rda$", all_files, invert = TRUE, value = TRUE)
+
+
+
+
+input_files <- list.files(path = 'parameter-estimation-outputs/estimates',"N.*(?<!iterations\\.Rda)$",full.names = TRUE,perl=TRUE)
 
 # Define a list of vectors for different outputs
 filtered_fluxes <- vector(mode="list",length=length(input_files))

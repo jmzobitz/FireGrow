@@ -1,8 +1,9 @@
 ### Author: JMZ
-### Last modified: 24/06/01
-### Purpose: Define a set of helper functions to compute and run the parameter estimation.  The main lifting is done by the function metropolis_estimate, which runs and saves all parameter estims.
+### Last modified: 25/01/04
+### Purpose: Define a set of helper functions to compute and run the parameter estimation several times.  The main lifting is done by the function metropolis_estimate_full which runs and saves all parameter estims.
 
-
+load('data/parameter-optimization-data.Rda')
+source('model-process/01-functions-approx-model.R')
 
 forcing_model_ready_input2 <- forcing_model_ready_input |>
   mutate(parameters = pmap(.l=list(parameters,estimated_params,which_parameters),
@@ -44,32 +45,35 @@ solve_nest_model_fall <- function(equations,initial_conditions,data,model_parame
 run_model_nest_revised <- function(input_model_data,
                                    model_parameters,
                                    field_data,
-                                   input_month) {
+                                   input_month,
+                                   input_year) {
 
 
   input_model_data |>
     mutate(results = pmap(.l=list(equations,initial_conditions,data),.f=~solve_nest_model_fall(equations = ..1,
-                                                                                          initial_conditions = ..2,
-                                                                                          data = ..3,
-                                                                                          model_parameters = model_parameters) ) ) |>
+                                                                                               initial_conditions = ..2,
+                                                                                               data = ..3,
+                                                                                               model_parameters = model_parameters) ) ) |>
     mutate(medianR = map_dbl(.x=results,.f=~(  .x |>
-                                            filter(month %in% input_month) |>
-                                            #group_by(year) |>
-                                            summarize(medianR = median(soil_R,na.rm=TRUE)) |> pull(medianR)))) |>
+                                                 filter(month %in% input_month,
+                                                        year %in% input_year) |>
+                                                 #group_by(year) |>
+                                                 summarize(medianR = median(soil_R,na.rm=TRUE)) |> pull(medianR)))) |>
 
     select(ID,results,medianR) |>
     separate(col=ID,into=c("Year","Area")) |>
-     left_join(field_data,by=c("Area"))
+    left_join(field_data,by=c("Area"))
 
 }
 
 # Test the code
-i<-3
+i<-7
 output_n <- run_model_nest_revised(
   input_model_data = forcing_model_ready_input2$modeling_data[[i]],
   model_parameters = forcing_model_ready_input2$parameters[[i]],
   field_data = forcing_model_ready_input2$field_data[[i]],
-  input_month = 8
+  input_month = 8,
+  input_year = 2015
 )
 
 
@@ -95,7 +99,8 @@ update_random_parameters <- function(input_parameters) {
 run_model_revised_random <- function(input_model_data,
                                      input_field_data,
                                      model_parameters,
-                                     input_month=8) {
+                                     input_month=8,
+                                     input_year = 2015) {
 
 
 
@@ -111,16 +116,17 @@ run_model_revised_random <- function(input_model_data,
     input_model_data = input_model_data,
     model_parameters = correct_time_params,
     field_data = input_field_data,
-    input_month = input_month)
+    input_month = input_month,
+    input_year = input_year)
 
   output_check <- output_n |>
-  summarize(rss=sum((Rsoil-medianR)^2),
-            accept = FALSE,
-            check = runif(1) > cor(Rsoil,medianR)^2,
-            finite_rss = is.finite(rss))
+    summarize(rss=sum((Rsoil-medianR)^2),
+              accept = FALSE,
+              check = runif(1) > cor(Rsoil,medianR)^2,
+              finite_rss = is.finite(rss))
 
 
-# Note: https://en.wikipedia.org/wiki/Coefficient_of_determination says that r^2 (given by cor) is the same as R^2 because we only have one predictor (Rsoil and median R)
+  # Note: https://en.wikipedia.org/wiki/Coefficient_of_determination says that r^2 (given by cor) is the same as R^2 because we only have one predictor (Rsoil and median R)
   out_list <- list(parameters = short_list,output_resp = select(output_n,Year,Area,results),output_test = output_check)
 
 
@@ -136,11 +142,12 @@ output_test <- run_model_revised_random(
   input_model_data = forcing_model_ready_input2$modeling_data[[i]],
   model_parameters = forcing_model_ready_input2$parameters[[i]],
   input_field_data = forcing_model_ready_input2$field_data[[i]],
-  input_month = 8
+  input_month = 8,
+  input_year = 2015
 )
 
 # Define a metropolis estimate for a given number of simulations
-metropolis_estimate <- function(model_data,field_data,parameters,n_sims) {
+metropolis_estimate_full <- function(model_data,field_data,parameters,n_sims) {
 
   # Initialize everything
   model_out <- run_model_revised_random(
@@ -185,9 +192,9 @@ metropolis_estimate <- function(model_data,field_data,parameters,n_sims) {
                        params = out_params,
                        fluxes = out_fluxes) |>
     unnest(cols=c(stats)) |>
-    select(-check) |>
-    slice_tail(prop=.6) |> ### Chose the last 60%
-    filter(accept) # Just make sure we are only take parameter sets that were accepted
+    select(-check) #|>
+    #slice_tail(prop=.6) |> ### Chose the last 60%
+    #filter(accept) # Just make sure we are only take parameter sets that were accepted
 
 
   return(out_values)
@@ -200,32 +207,38 @@ i<-9    # Quality, NC
 i<-1  # Microbe, 2012
 
 ### Can we do a smaller dataset?
- out_estimates <- metropolis_estimate(model_data = forcing_model_ready_input2$modeling_data[[i]],
-                             field_data = forcing_model_ready_input2$field_data[[i]],
-                             parameters = forcing_model_ready_input2$parameters[[i]],
-                             n_sims = 100)
-
-# Works!
+out_estimates <- metropolis_estimate_full(model_data = forcing_model_ready_input2$modeling_data[[i]],
+                                     field_data = forcing_model_ready_input2$field_data[[i]],
+                                     parameters = forcing_model_ready_input2$parameters[[i]],
+                                     n_sims = 500)
 
 
- ### Now lets get ready to estimate everything!
-
-curr_sims <- 2000
 for (i in 1:nrow(forcing_model_ready_input2)) {
 
   print(i)
 
-  out_tibble <- metropolis_estimate(model_data = forcing_model_ready_input2$modeling_data[[i]],
-                                    field_data = forcing_model_ready_input2$field_data[[i]],
-                                    parameters = forcing_model_ready_input2$parameters[[i]],
-                                    n_sims = curr_sims)
+  n_times <- 10
+  out_sims <- vector(mode = "list",length = n_times)
+  curr_sims <- 500
 
-  filename <- paste0('parameter-estimation-outputs/estimates-no-swc/',
+  for (sims_no in 1:n_times) {
+    out_tibble <- metropolis_estimate_full(model_data = forcing_model_ready_input2$modeling_data[[i]],
+                                      field_data = forcing_model_ready_input2$field_data[[i]],
+                                      parameters = forcing_model_ready_input2$parameters[[i]],
+                                      n_sims = curr_sims)
+
+    out_sims[[sims_no]] <- out_tibble |> select(sims,rss)
+  }
+
+  out_values <- tibble(iteration = 1:n_times,values = out_sims) |> unnest(cols=c(values))
+
+
+  filename <- paste0('parameter-estimation-outputs/estimates/',
                      forcing_model_ready_input2$Year[[i]],'--',
                      forcing_model_ready_input2$model[[i]],'--',
-                     forcing_model_ready_input2$depth[[i]],'.Rda')
+                     forcing_model_ready_input2$depth[[i]],'iterations.Rda')
 
-  save(out_tibble,file = filename)
+  save(out_values,file = filename)
 
 
 }

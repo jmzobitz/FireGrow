@@ -2,7 +2,8 @@
 ### Last modified: 24/06/01
 ### Purpose: Define a set of helper functions to compute and run the parameter estimation.  The main lifting is done by the function metropolis_estimate, which runs and saves all parameter estims.
 
-
+load('data/parameter-optimization-data.Rda')
+source('model-process/01-functions-approx-model.R')
 
 forcing_model_ready_input2 <- forcing_model_ready_input |>
   mutate(parameters = pmap(.l=list(parameters,estimated_params,which_parameters),
@@ -44,7 +45,8 @@ solve_nest_model_fall <- function(equations,initial_conditions,data,model_parame
 run_model_nest_revised <- function(input_model_data,
                                    model_parameters,
                                    field_data,
-                                   input_month) {
+                                   input_month,
+                                   input_year) {
 
 
   input_model_data |>
@@ -53,7 +55,8 @@ run_model_nest_revised <- function(input_model_data,
                                                                                           data = ..3,
                                                                                           model_parameters = model_parameters) ) ) |>
     mutate(medianR = map_dbl(.x=results,.f=~(  .x |>
-                                            filter(month %in% input_month) |>
+                                            filter(month %in% input_month,
+                                                   year %in% input_year) |>
                                             #group_by(year) |>
                                             summarize(medianR = median(soil_R,na.rm=TRUE)) |> pull(medianR)))) |>
 
@@ -69,7 +72,8 @@ output_n <- run_model_nest_revised(
   input_model_data = forcing_model_ready_input2$modeling_data[[i]],
   model_parameters = forcing_model_ready_input2$parameters[[i]],
   field_data = forcing_model_ready_input2$field_data[[i]],
-  input_month = 8
+  input_month = 8,
+  input_year = 2015
 )
 
 
@@ -95,7 +99,8 @@ update_random_parameters <- function(input_parameters) {
 run_model_revised_random <- function(input_model_data,
                                      input_field_data,
                                      model_parameters,
-                                     input_month=8) {
+                                     input_month=8,
+                                     input_year = 2015) {
 
 
 
@@ -111,7 +116,8 @@ run_model_revised_random <- function(input_model_data,
     input_model_data = input_model_data,
     model_parameters = correct_time_params,
     field_data = input_field_data,
-    input_month = input_month)
+    input_month = input_month,
+    input_year = input_year)
 
   output_check <- output_n |>
   summarize(rss=sum((Rsoil-medianR)^2),
@@ -136,7 +142,8 @@ output_test <- run_model_revised_random(
   input_model_data = forcing_model_ready_input2$modeling_data[[i]],
   model_parameters = forcing_model_ready_input2$parameters[[i]],
   input_field_data = forcing_model_ready_input2$field_data[[i]],
-  input_month = 8
+  input_month = 8,
+  input_year = 2015
 )
 
 # Define a metropolis estimate for a given number of simulations

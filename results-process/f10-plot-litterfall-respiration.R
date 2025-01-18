@@ -150,11 +150,15 @@ make_regression_plot <- function(input_data,
     print()
 
 
+  # Custom colors for categories
+  custom_colors <- c("N2012" = '#a6cee3', "N1990" = '#1f78b4',  "N1969" = '#b2df8a', "NC" = '#33a02c')
+
   out_plot <- input_data |>
     mutate(Year = factor(Year,levels=c('N2012','N1990','N1969','NC')),
            depth = factor(depth,levels=c('T_soil_5','T_soil_10')),
            model = factor(model,levels=c('null','microbe','quality'))) |>
     ggplot(aes(color=Year,fill=Year)) +
+    scale_color_manual(values = custom_colors) +
 
     # 2D box defined by the Q1 & Q3 values in each dimension, with outline
     geom_rect(aes(xmin = x.lower, xmax = x.upper, ymin = y.lower, ymax = y.upper), alpha = 0.3,color=NA) +
@@ -176,12 +180,14 @@ make_regression_plot <- function(input_data,
     facet_grid(depth~model,labeller = my_labeller2)  +
     theme(legend.position="bottom") +
     theme_fulbright() +
-    labs(x=x_label,y=y_label,color="Site:",fill="Site:") +
-    scale_color_discrete(
+    labs(x=x_label,y=y_label,color="Chronosequence Site:",fill="Chronosequence Site:") +
+    scale_color_manual(
+      values = custom_colors,
       limits = c("N2012", "N1990", "N1969","NC"),
       labels = c("2012", "1990", "1968","Control")
     ) +
-    scale_fill_discrete(
+    scale_fill_manual(
+      values = custom_colors,
       limits = c("N2012", "N1990", "N1969","NC"),
       labels = c("2012", "1990", "1968","Control")
     ) +
@@ -247,7 +253,7 @@ grid_arrange_shared_legend <- function(in_plots,in_legend) {
 ### Create and save!
 out_plot <- grid_arrange_shared_legend(out_plots_regression_legend,legend)
 
-ggsave(filename = 'manuscript-figures/regressions-respiration.png',plot = out_plot,width = 5,height=11)
+ggsave(filename = 'manuscript-figures/regressions-respiration.png',plot = out_plot,width = 7,height=14)
 
 
 ####

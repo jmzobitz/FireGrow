@@ -89,9 +89,15 @@ parameter_plot <- function(in_box_data,in_med_data,min_val,max_val,make_plot) {
 
 
     p1 <- base_plot +
-      geom_hline(data = lines,aes(yintercept=values),alpha=0.25,linetype='dashed') +
+      geom_hline(data = lines,aes(yintercept=values),alpha=0.75,linetype='dashed') +
+      geom_boxplot(data = in_box_data,aes(x=Year,y=value),inherit.aes = TRUE,width=0.6) +
       geom_line(data = in_med_data,aes(x=Year,y=med_val,group=1),color='red',linewidth=1.5,inherit.aes = TRUE) +
-      geom_boxplot(data = in_box_data,aes(x=Year,y=value),inherit.aes = TRUE,width=0.6)
+      geom_point(data = in_med_data,aes(x=Year,y=med_val,group=1),color='red',size=10,inherit.aes = TRUE) +
+      theme(
+                 plot.margin = margin(0, 0, 0, 0),  # Reduce plot margin
+                 panel.spacing = unit(0.5, "lines") # Reduce facet panel spacing
+             )
+
 
 
   } else { p1 <- base_plot}
@@ -206,7 +212,7 @@ make_parameter_table <- function(input_vector,save_name,table_name=NULL) {
         locations = cells_body(columns = all_of(curr_name)),
         fn = function(x) {
 
-          map(pull(select(test_data,all_of(curr_name))), ggplot_image, height = px(100))
+          map(pull(select(test_data,all_of(curr_name))), ggplot_image, height = px(150))
 
         }
       )
@@ -433,8 +439,8 @@ kruskal_plot <- function(input_data,model_plot) {
         axis.text = element_text(size=18),
         panel.border = element_rect(colour = "grey50", fill=NA)
       ) +
-      scale_x_discrete(labels= c("2012", "1990", "1969","Control")) +
-      scale_y_discrete(labels= c("2012", "1990", "1969","Control")) #+
+      scale_x_discrete(labels= c("2012", "1990", "1968","Control")) +
+      scale_y_discrete(labels= c("2012", "1990", "1968","Control")) #+
       #geom_label(aes(x=1,y=4.35),label='5 cm depth',size=8) +
       #geom_label(aes(x=3,y=0.65),label='10 cm depth',size=8)
 
