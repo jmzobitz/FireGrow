@@ -17,28 +17,22 @@ solve_null_model <- function(times, parameters, initial_conditions, dt = 1) {
     swc <- pmax(3.11 * swc - 2.42 * swc^2, 0) # Adjustment Moyano 2013
 
     root_litter_rate <- root_turnover
-    root_R_rate <- kR * Q10R^(soilT / 10) * swc * (soilT > 0)
+    root_R_rate <- kR * Q10R^((soilT-10) / 10) * swc * (soilT > 0)
 
 
-    # Microbes - null model  - contains f scaling parameter
-    microbe_R_rate <- f * kS * Q10M^(soilT / 10) * swc
-
-
-    ### Define an iterative method
-    CR_new <- array(initial_conditions[1], dim = length(times))
-    CS_new <- array(initial_conditions[2], dim = length(times))
-
+    # Microbes - null model
+    microbe_R_rate <- kS * Q10M^((soilT-10) / 10) * swc
 
     CR_new <- (alphaR - betaR) * gpp / (root_litter_rate + root_R_rate)
 
-    CS_new <- betaR * gpp + shrub_litter + moss_litter + wood_litter + root_litter_rate * CR_new
+
 
     ####
 
     ### Compute respiration
     out_resp <- tibble(
       root_R = root_R_rate * CR_new,
-      microbe_R = CS_new, # previously: microbe_R_rate*CS_new,
+      microbe_R = betaR * gpp + shrub_litter + moss_litter + wood_litter + root_litter_rate * CR_new,
       soil_R = root_R + microbe_R,
       RA = root_R / soil_R
     )
@@ -46,7 +40,7 @@ solve_null_model <- function(times, parameters, initial_conditions, dt = 1) {
     ###
     out_state <- tibble(
       CR = CR_new,
-      CS = CS_new
+      CS = 0
     )
 
     return(list(respiration = out_resp, states = out_state))
@@ -72,25 +66,15 @@ solve_microbe_model <- function(times, parameters, initial_conditions, dt = 1) {
     swc <- pmax(3.11 * swc - 2.42 * swc^2, 0) # Adjustment Moyano 2013
 
     root_litter_rate <- root_turnover
-    root_R_rate <- kR * Q10R^(soilT / 10) * swc * (soilT > 0)
+    root_R_rate <- kR * Q10R^((soilT-10) / 10) * swc * (soilT > 0)
 
 
     aboveground_input_rates <- betaR * gpp + shrub_litter + moss_litter + wood_litter
 
 
     # notice the extra scaling parameter f
-    microbe_R_rate <- kM * Q10M^(soilT / 10) * swc
-    microbe_growth_rate <- mu
+    microbe_R_rate <- kM * Q10M^((soilT-10) / 10) * swc
 
-
-
-    ### Define an iterative method
-    CR_new <- array(initial_conditions[1], dim = length(times))
-    CS_new <- array(initial_conditions[2], dim = length(times))
-    CM_new <- array(initial_conditions[3], dim = length(times))
-
-
-    y_old <- c(CS_new[[1]], CM_new[[1]])
 
     CR_new <- (alphaR - betaR) * gpp / (root_litter_rate + root_R_rate)
 
@@ -107,8 +91,8 @@ solve_microbe_model <- function(times, parameters, initial_conditions, dt = 1) {
 
     out_state <- tibble(
       CR = CR_new,
-      CS = CS_new,
-      CM = CM_new
+      CS = 0,
+      CM = 0
     )
 
     return(list(respiration = out_resp, states = out_state))
@@ -131,22 +115,10 @@ solve_quality_model <- function(times, parameters, initial_conditions, dt = 1) {
     swc <- pmax(3.11 * swc - 2.42 * swc^2, 0) # Adjustment Moyano 2013
 
     root_litter_rate <- root_turnover
-    root_R_rate <- kR * Q10R^(soilT / 10) * swc * (soilT > 0)
+    root_R_rate <- kR * Q10R^((soilT-10) / 10) * swc * (soilT > 0)
 
     # Microbes - quality model contains f scaling paramater
-    microbe_R_rate <- kM * Q10M^(soilT / 10) * swc
-    microbe_growth_rate <- mu
-
-
-
-
-    ### Define an iterative method
-    CR_new <- array(initial_conditions[1], dim = length(times))
-    C1_new <- array(initial_conditions[2], dim = length(times))
-    C2_new <- array(initial_conditions[3], dim = length(times))
-    C3_new <- array(initial_conditions[4], dim = length(times))
-    CA_new <- array(initial_conditions[5], dim = length(times))
-    CM_new <- array(initial_conditions[6], dim = length(times))
+    microbe_R_rate <- kM * Q10M^((soilT-10) / 10) * swc
 
 
     ### NEW CODE HERE
@@ -173,11 +145,11 @@ solve_quality_model <- function(times, parameters, initial_conditions, dt = 1) {
     ###
     out_state <- tibble(
       CR = CR_new,
-      C1 = C1_new,
-      C2 = C2_new,
-      C3 = C3_new,
-      CA = CA_new,
-      CM = CM_new
+      C1 = 0,
+      C2 = 0,
+      C3 = 0,
+      CA = 0,
+      CM = 0
     )
 
     return(list(respiration = out_resp, states = out_state))

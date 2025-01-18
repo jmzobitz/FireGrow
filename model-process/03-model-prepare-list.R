@@ -59,3 +59,5 @@ forcing_model_ready_input <- model_ready_functions |>
   unnest(cols=c("site_data")) |>
   unnest(cols=c("estimate_data"))
 
+# Save this data at the end ...
+save(forcing_model_ready_input,file='data/parameter-optimization-data.Rda')
