@@ -3,13 +3,6 @@
 ### Purpose: Parameterize a model of soil temperature with collected IButton Data
 
 
-# Main model: T = T_0 + A * exp(-kz) sin(wt + phi - kz)
-# T = T_0 + A_bar sin(wt + phi_bar) where
-# A_bar = A*exp(-kz), phi_bar = phi - kz
-# k = sqrt(w/2D)
-# w = 2pi
-# t is measured in fraction of a year, z in meters
-
 
 # Do a fit of the periodic data - david periodic 1959
 # we have T = T_0 + A_bar sin(wt + phi_bar)  =

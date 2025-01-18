@@ -34,10 +34,6 @@ set.seed(20240601)  ## Set random seed for reproducibility
 # model-process: runs the model and parameter estimations
 # results-process: runs script files to prepare model figures.
 
-# At all stages these libraries need to be loaded:
-library(tidyverse)
-library(lubridate)
-library(FireGrow)
 
 # Prepare all the data
 data_files <- list.files(path = 'data-process',full.names=TRUE)
@@ -45,8 +41,7 @@ for (i in 1: length(data_files)) {
   print(data_files[[i]])
   source(data_files[[i]])
 }
-# 3 not working
-source(yoop[[4]])
+
 
 ## Use devtools to build, install, document:
 # devtools::build()
@@ -54,13 +49,7 @@ source(yoop[[4]])
 # devtools::install()
 
 
-# Process model
-library(tidyverse)
-library(lubridate)
-library(FireGrow)
-
 # Prepare parameter estimates
-set.seed(20240601)  ## Set random seed for reproducibility
 model_files <- list.files(path = 'model-process',full.names=TRUE)
 for (i in 1: length(model_files)) {
   print(model_files[[i]])
