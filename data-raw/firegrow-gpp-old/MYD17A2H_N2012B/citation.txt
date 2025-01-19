@@ -1,3 +1,0 @@
-ORNL DAAC. 2018. MODIS and VIIRS Land Products Global Subsetting and Visualization Tool. ORNL DAAC, Oak Ridge, Tennessee, USA. Accessed May 23, 2022. Subset obtained for MYD17A2H product at 65.9236N,137.4222W, time period: 2010-01-01 to 2021-12-31, and subset size: 6.5 x 6.5 km. https://doi.org/10.3334/ORNLDAAC/1379
-
-S. Running, Q. M., M.Zhao. 2015. MYD17A2H MODIS/Aqua Gross Primary Productivity 8-Day L4 Global 500m SIN Grid V006. NASA EOSDIS Land Processes DAAC. https://doi.org/10.5067/MODIS/MYD17A2H.006
