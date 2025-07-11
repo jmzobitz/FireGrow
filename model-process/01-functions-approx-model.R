@@ -1,7 +1,8 @@
 ### Author: JMZ
 ### Last modified: 24/06/01
 ### Purpose: Define functions that interpolate the signal for a data stream, globally bound so accessible outside of the function
-
+library(FireGrow)
+library(tidyverse)
 # Interpolates a continuous signal from a timeseries measurement, using linear approximation.
 signal_approx<- function(input_data_stream) {
   times <<- seq(0, length(input_data_stream)-1, by = 1) # This will now be defined globally

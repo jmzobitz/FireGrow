@@ -17,6 +17,8 @@
 ## pH = -0.138 ln(RS) +1.482
 ## pA + pH = 1 so pA - 0.138 ln(RS) + 1.482 = 1
 ## pA = 0.138 ln(RS) - 0.482
+## pA = 0.16 + 0.04 ln(RS)  # Jian 2022
+
 
 library(gridExtra)
 library(grid)
@@ -98,7 +100,7 @@ subplot_label <- c("a)","b)","c)")
   plot_info |>
     mutate(rmse = pmap(.l = list(input_data,regression_slope,regression_intercept),.f=function(x,y,z) {
       x |> group_by(model,depth) |>
-        summarize(rmse_out = sqrt(sum( (y.middle - (z+y*x.middle) )^2 ) )) |>
+        summarize(rmse_out = sqrt(sum( (y.middle - (z+y*x.middle) )^2 ) )/sqrt(n())) |>
         arrange((rmse_out))
 
       }) ) |> pull(rmse)
@@ -150,6 +152,10 @@ make_regression_plot <- function(input_data,
     print()
 
 
+  # Custom colors
+  custom_colors <- c("N2012" = '#a6cee3', "N1990" = '#1f78b4',
+                     "N1969" = '#b2df8a', "NC" = '#33a02c')
+
   out_plot <- input_data |>
     mutate(Year = factor(Year,levels=c('N2012','N1990','N1969','NC')),
            depth = factor(depth,levels=c('T_soil_5','T_soil_10')),
@@ -177,11 +183,13 @@ make_regression_plot <- function(input_data,
     theme(legend.position="bottom") +
     theme_fulbright() +
     labs(x=x_label,y=y_label,color="Site:",fill="Site:") +
-    scale_color_discrete(
+    scale_color_manual(
+      values = custom_colors,
       limits = c("N2012", "N1990", "N1969","NC"),
       labels = c("2012", "1990", "1968","Control")
     ) +
-    scale_fill_discrete(
+    scale_fill_manual(
+      values = custom_colors,
       limits = c("N2012", "N1990", "N1969","NC"),
       labels = c("2012", "1990", "1968","Control")
     ) +

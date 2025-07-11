@@ -88,9 +88,17 @@ my_labeller2 <- as_labeller(c("null"="Null", "microbe"="Microbe","quality"="Qual
   p1 <- make_respiration_plots("T_soil_5") + ggtitle('5 cm depth')
   p2 <- make_respiration_plots("T_soil_10") + ggtitle('10 cm depth')
 
+
+
+
   # Now save them
   ggsave(filename = 'manuscript-figures/flux-results-model-5cm.png',plot = p1,width = 11,height=8)
   ggsave(filename = 'manuscript-figures/flux-results-model-10cm.png',plot = p2,width = 11,height=8)
+
+  # Now save them
+  out_p <- gridExtra::grid.arrange(p1,p2,nrow=1)
+  ggsave(filename = 'manuscript-figures/flux-results-model.png',plot = out_p,width = 22,height=8)
+
 
   my_labeller2 <- as_labeller(c("null"="Null", "microbe"="Microbe","quality"="Quality","N2012"="2012","N1969"="1968","NC"="Control","N1990"="1990"),default = label_parsed)
 
@@ -128,4 +136,10 @@ my_labeller2 <- as_labeller(c("null"="Null", "microbe"="Microbe","quality"="Qual
   # Now save them
   ggsave(filename = 'manuscript-figures/proportion-results-model-5cm.png',plot = stream_5cm,width = 11,height=8)
   ggsave(filename = 'manuscript-figures/proportion-results-model-10cm.png',plot = stream_10cm,width = 11,height=8)
+
+  # Now save them
+  out_p <- gridExtra::grid.arrange(stream_5cm,stream_10cm,nrow=1)
+  ggsave(filename = 'manuscript-figures/proportion-results-model.png',plot = out_p,width = 22,height=8)
+
+
 

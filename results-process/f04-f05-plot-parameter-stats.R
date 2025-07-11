@@ -90,8 +90,11 @@ parameter_plot <- function(in_box_data,in_med_data,min_val,max_val,make_plot) {
 
     p1 <- base_plot +
       geom_hline(data = lines,aes(yintercept=values),alpha=0.25,linetype='dashed') +
-      geom_line(data = in_med_data,aes(x=Year,y=med_val,group=1),color='red',linewidth=1.5,inherit.aes = TRUE) +
-      geom_boxplot(data = in_box_data,aes(x=Year,y=value),inherit.aes = TRUE,width=0.6)
+
+      #geom_boxplot(data = in_box_data,aes(x=Year,y=value),inherit.aes = TRUE,width=0.6)
+    geom_violin(data = in_box_data,aes(x=Year,y=value),inherit.aes = TRUE,draw_quantiles = c(0.25, 0.5, 0.75)) +
+      geom_line(data = in_med_data,aes(x=Year,y=med_val,group=1),color='red',size = 1, linewidth=1.5,inherit.aes = TRUE) +
+      geom_point(data = in_med_data,aes(x=Year,y=med_val,group=1),color='red',size = 10,inherit.aes = TRUE)
 
 
   } else { p1 <- base_plot}

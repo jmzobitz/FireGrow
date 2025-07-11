@@ -69,7 +69,7 @@ p1 <- ndvi_binned |>
   xlim(c(0,1)) +
   theme_fulbright() +
   labs(x="NDVI",
-       y="LST (Celsius)") +
+       y="LST (°C)") +
   guides(color="none")
 
 

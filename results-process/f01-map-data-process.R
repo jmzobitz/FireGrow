@@ -144,7 +144,9 @@ my_sites <- modis_pixels |>
                             labels=c("2012","1990","1968","Control")) )
 
 #my_colors <- c('#e41a1c','#377eb8','#4daf4a','#984ea3')
-my_colors <- c('#785EF0','#DC267F','#FE6100','#FFB000')
+#my_colors <- c('#785EF0','#DC267F','#FE6100','#FFB000')
+
+my_colors <-  c('#a6cee3','#1f78b4', '#b2df8a','#33a02c')
 
 
 # Define the pallette
@@ -192,7 +194,7 @@ make_base_map <- function(map_title,long_view=-136,lat_view=67,save_file=NULL) {
 
   out_map <- leaflet(options = leafletOptions(
     attributionControl=TRUE)) |>
-    addTiles(attribution = '© OpenStreetMap contributors 2024. Distributed under the Open Data Commons Open Database License (ODbL) v1.0.') |>
+    addTiles(attribution = '') |>
     setView(lng =long_view, lat=lat_view,zoom=4) |>
     addRectangles(
       lng1=-134.3, lat1=68.2,
@@ -243,12 +245,14 @@ make_site_map <- function(map_title,long_view,lat_view,save_file=NULL) {
   )
 
 
+
   out_map <- leaflet(options = leafletOptions(
     attributionControl=TRUE)) |>
-    addTiles(attribution = '© OpenStreetMap contributors 2024. Distributed under the Open Data Commons Open Database License (ODbL) v1.0.') |>
+    addTiles(attribution = '© OpenStreetMap contributors © CartoDB') |>
     setView(lng =long_view, lat=lat_view,zoom=9) |>
     addMarkers(
       data = filter(my_sites_map,plot_point),
+      #color = ~pal(site_name),
       lng = ~ long,
       lat = ~ lat,
       icon = ~ icons(
@@ -256,9 +260,9 @@ make_site_map <- function(map_title,long_view,lat_view,save_file=NULL) {
         iconWidth = 20,
         iconHeight = 20
       ) ) |>
-    addPolygons(data=fire_1968,color = my_colors[3], weight = 1, smoothFactor = 0.5,opacity = 1.0, fillOpacity = 0.4,group="1968 Fires.") |>
-    addPolygons(data=fire_1990,color = my_colors[2], weight = 1, smoothFactor = 0.5,opacity = 1.0, fillOpacity = 0.4,group="1990 Fires") |>
-    addPolygons(data=fire_2012,color = my_colors[1], weight = 1, smoothFactor = 0.5,opacity = 1.0, fillOpacity = 0.4,group="2012 Fires") |>
+    addPolygons(data=fire_1968,color = 'orange', weight = 1, smoothFactor = 0.5,opacity = 1.0, fillOpacity = 0.4,group="1968 Fires.") |>
+    addPolygons(data=fire_1990,color = 'orange', weight = 1, smoothFactor = 0.5,opacity = 1.0, fillOpacity = 0.4,group="1990 Fires") |>
+    addPolygons(data=fire_2012,color = 'orange', weight = 1, smoothFactor = 0.5,opacity = 1.0, fillOpacity = 0.4,group="2012 Fires") |>
     addRectangles(
       lng1=-134.3, lat1=68.2,
       lng2=-133.1, lat2=67.8,
@@ -369,17 +373,42 @@ make_inset_map <- function(map_title,long_view,lat_view,save_file=NULL) {
 }
 
 
-make_base_map("a)",save_file = 'manuscript-figures/01-a-base-map.png')
+make_base_map("",save_file = 'manuscript-figures/01-base-map.png')
 
 
-make_site_map('b)',-136.94,66.15,save_file = 'manuscript-figures/01-b-north-sites.png')
-make_site_map('c)',-133.59,68.025,save_file = 'manuscript-figures/01-c-south-sites.png')
 
-make_inset_map("d)",-137.42,65.89,save_file = 'manuscript-figures/01-d-inset.png')
-make_inset_map("e)",-133.47,68,save_file = 'manuscript-figures/01-e-inset.png')
+make_site_map('a)',-136.94,66.15,save_file = 'manuscript-figures/01-a-north-sites.png')
+make_site_map('b)',-133.59,68.025,save_file = 'manuscript-figures/01-b-south-sites.png')
 
-
-make_inset_map("f)",-136.71,66.3,save_file = 'manuscript-figures/01-f-inset.png')
-make_inset_map("g)",-137.27,66.0,save_file = 'manuscript-figures/01-g-inset.png')
+#make_inset_map("d)",-137.42,65.89,save_file = 'manuscript-figures/01-d-inset.png')
+#make_inset_map("e)",-133.47,68,save_file = 'manuscript-figures/01-e-inset.png')
 
 
+#make_inset_map("f)",-136.71,66.3,save_file = 'manuscript-figures/01-f-inset.png')
+#make_inset_map("g)",-137.27,66.0,save_file = 'manuscript-figures/01-g-inset.png')
+
+
+### Now combine these
+
+# Combine the images into one map with an inset using cowplot
+main_img_a <- cowplot::ggdraw() + cowplot::draw_image('manuscript-figures/01-a-north-sites.png')
+inset_img <- cowplot::ggdraw() + cowplot::draw_image('manuscript-figures/01-base-map.png')
+
+# Add inset to the main image
+combined_map_a <- cowplot::ggdraw() +
+  cowplot::draw_plot(main_img_a) +
+  cowplot::draw_plot(inset_img, x = 0.7, y = 0.05, width = 0.3, height = 0.3)
+
+# Save the final combined map
+ggsave('manuscript-figures/01-a-inset-north-sites.png', combined_map_a, width = 10, height = 8)
+
+main_img_b <- cowplot::ggdraw() + cowplot::draw_image('manuscript-figures/01-b-south-sites.png')
+
+
+# Add inset to the main image
+combined_map_b <- cowplot::ggdraw() +
+  cowplot::draw_plot(main_img_b) +
+  cowplot::draw_plot(inset_img, x = 0.7, y = 0.05, width = 0.3, height = 0.3)
+
+# Save the final combined map
+ggsave('manuscript-figures/01-b-inset-south-sites.png', combined_map_b, width = 10, height = 8)

@@ -39,7 +39,7 @@ p1 <- soil_temperature_iButton_data |>
   ggplot(aes(x=Date,y=T_soil)) + geom_point(size=0.5,alpha=0.4) +
   geom_line(data = soilT_time_small,aes(x=date,y=T_soil),color='red',inherit.aes=FALSE) +
   facet_grid(layer~ID) + theme_fulbright() +
-    labs(y="Soil Temperature (Celsius)") +
+    labs(y="Soil Temperature (°C)") +
    scale_x_date(date_breaks = "3 months" , date_labels = "%Y-%m") +
    geom_hline(yintercept = 0, linetype = 'dashed') +
    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
