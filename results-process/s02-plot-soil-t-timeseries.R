@@ -23,8 +23,9 @@ soilT_time_small <- soil_temp_timeseries |>
   #rename(layer=name) |>
   mutate(ID = factor(ID,levels=c("N2012","N1990","N1968","NC"),
                      labels=c("2012","1990","1968","Control"))) |>
-  mutate(layer = factor(layer,levels=c("L5","L10","L30"),
-                        labels = c("5 cm","10 cm","30 cm")))
+  filter(layer != "L30") |>
+  mutate(layer = factor(layer,levels=c("L5","L10"),
+                        labels = c("5 cm","10 cm")))
 
 
 

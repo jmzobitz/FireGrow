@@ -68,7 +68,7 @@ p1 <- ndvi_binned |>
   geom_smooth(method="lm",se=FALSE) +
   xlim(c(0,1)) +
   theme_fulbright() +
-  labs(x="NDVI",
+  labs(x="NDVI (no units)",
        y="LST (°C)") +
   guides(color="none")
 

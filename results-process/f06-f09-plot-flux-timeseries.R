@@ -2,6 +2,8 @@
 ### Last modified: 24/06/01
 ### Purpose: Plot the flux results at each of the different sites, summarized by the year
 
+library(tidyverse)
+library(FireGrow)
 
 load('parameter-estimation-outputs/parameter-estimate-summary.Rda')
 
@@ -120,13 +122,13 @@ my_labeller2 <- as_labeller(c("null"="Null", "microbe"="Microbe","quality"="Qual
       facet_grid(model~Year,labeller = my_labeller2,scales="free_y") +
       theme(legend.position="bottom") +
       theme_fulbright() +
-      labs(x=NULL,y="Proportion",fill="Flux:") +
+      labs(x=NULL,y="Proportion (unitless)",fill="Flux proportion:") +
       scale_y_continuous(breaks = seq(0,1,by=0.2)) +
       scale_x_date( date_labels = "%b",
                     limits = as.Date(c('2018-12-21','2020-01-01')),
                     breaks = c(as.Date('2019-01-01'),as.Date('2019-04-01'),as.Date('2019-07-01'),as.Date('2019-10-01'),as.Date('2019-12-31')))  +
       theme(axis.text.x=element_text(angle = 45, vjust = 0.5) ) +
-      scale_fill_viridis_d( labels = c(root_R=expression(R[A]), microbeGrowth=expression(R[G]),microbe_R=expression(R[H])))
+      scale_fill_viridis_d( labels = c(root_R=expression(p[A]), microbeGrowth=expression(p[G]),microbe_R=expression(p[H])))
 
 
   }

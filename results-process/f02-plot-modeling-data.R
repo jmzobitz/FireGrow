@@ -51,7 +51,7 @@ reframe(out_value = quantile(value,na.rm=TRUE,probs = c(0.025,0.5,0.975)),q=c(1,
 # Now we are ready to plot according to our simulation
 my_labeller <- as_labeller(c(T_soil_5="5~cm~T[S]~('°C')",
                              T_soil_10="10~cm~T[S]~('°C')",
-                             gpp="GPP~(gC~m^-2~d^-1)",
+                             gpp="F[GPP]~(gC~m^-2~d^-1)",
                              swc="SWC~(no~units)",
                              N2012="2012",
                              N1990="1990",
