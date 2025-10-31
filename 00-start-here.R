@@ -12,9 +12,6 @@ library(tidyverse)
 library(FireGrow)
 
 
-# Process model
-set.seed(20240601)  ## Set random seed for reproducibility
-### Main script to run all model analysis.  This sequentially loads and run files in three directories:
 
 
 
@@ -25,16 +22,22 @@ for (i in 1: length(data_files)) {
   source(data_files[[i]])
 }
 
+# Free up space
+rm(list = ls())
 
 ## Use devtools to build, install, document:
-# devtools::build()
-# devtools::document()
-# devtools::install()
+ devtools::build()
+ devtools::document()
+ devtools::install()
+
+ # Process model
+set.seed(20240601)  ## Set random seed for reproducibility
+ ### Main script to run all model analysis.  This sequentially loads and run files in three directories:
 
 
 # Prepare parameter estimates
 model_files <- list.files(path = 'model-process',full.names=TRUE)
-for (i in 6:length(model_files)) {
+for (i in 1:length(model_files)) {
   print(model_files[[i]])
   source(model_files[[i]])
 }
